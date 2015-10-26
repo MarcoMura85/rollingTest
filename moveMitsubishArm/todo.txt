@@ -1,0 +1,5 @@
+set goal tollerance
+
+set small increment 
+
+implement sin cos a movement
