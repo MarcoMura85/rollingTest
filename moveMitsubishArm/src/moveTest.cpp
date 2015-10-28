@@ -9,7 +9,8 @@
 #include <moveit_msgs/PlanningScene.h>
 #include <tf/tf.h>
 #include <tf/transform_datatypes.h>
-
+#include <tf_conversions/tf_eigen.h>
+#include <eigen_conversions/eigen_msg.h>
 #include <moveMitsubishArm/KeyboardInput.h>
 
 
@@ -19,6 +20,8 @@ void moveCartesian (moveit::planning_interface::MoveGroup *group, float dx,float
     geometry_msgs::Pose targetPose = group->getCurrentPose().pose;
     std::vector< double > Angles=group->getCurrentRPY();
     moveit::planning_interface::MoveGroup::Plan plan;
+
+    waypoints.push_back(targetPose);
 
     targetPose.position.x += dx;
     targetPose.position.y += dy;
@@ -32,15 +35,16 @@ void moveCartesian (moveit::planning_interface::MoveGroup *group, float dx,float
 
 
     double fraction = group->computeCartesianPath(waypoints,
-                                                  0.001,  // eef_step
+                                                  0.0001,  // eef_step
                                                   0.0,   // jump_threshold
                                                   trajectory_msg, false);
 
     // First to create a RobotTrajectory object
-    robot_trajectory::RobotTrajectory rt(group->getCurrentState()->getRobotModel(), "arm");
+   // robot_trajectory::RobotTrajectory rt(group->getCurrentState()->getRobotModel(), "arm");
+    robot_trajectory::RobotTrajectory rt(group->getCurrentState()->getRobotModel(), "manipulator");
 
     // Second get a RobotTrajectory from trajectory
-    rt.setRobotTrajectoryMsg(*group->getCurrentState(), trajectory_msg);
+    rt.setRobotTrajectoryMsg(*group->getCurrentState(), trajectory_msg);    
 
     // Thrid create a IterativeParabolicTimeParameterization object
     trajectory_processing::IterativeParabolicTimeParameterization iptp;
@@ -66,6 +70,22 @@ void moveCartesian (moveit::planning_interface::MoveGroup *group, float dx,float
 //    group->move();
 
     std::cout<<"new position reached"<<std::endl;
+
+//    robot_trajectory::RobotTrajectory trajectory(robot_model, move_group_name_);
+//    trajectory.setRobotTrajectoryMsg(*(move_group.getCurrentState()),
+//    plan.trajectory_);
+
+    moveit::core::RobotState robot_state = rt.getLastWayPoint();
+    Eigen::Affine3d eef_transform =
+    robot_state.getGlobalLinkTransform(group->getEndEffectorLink());
+
+    geometry_msgs::Pose pose_target;
+    tf::poseEigenToMsg(eef_transform, pose_target);
+
+    std::cout<<"target.x="<<targetPose.position.x<<" pose.x="<<pose_target.position.x<<std::endl;
+    std::cout<<"target.x="<<targetPose.position.y<<" pose.x="<<pose_target.position.y<<std::endl;
+    std::cout<<"target.x="<<targetPose.position.z<<" pose.x="<<pose_target.position.z<<std::endl;
+
 }
 
 
@@ -98,7 +118,8 @@ int main(int argc, char **argv)
     ros::AsyncSpinner spinner(1);
     spinner.start();
 
-    moveit::planning_interface::MoveGroup group("arm");
+    moveit::planning_interface::MoveGroup group("manipulator");
+    //moveit::planning_interface::MoveGroup group("arm");
     //moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
 
     ros::Publisher display_publisher = node_handle.advertise<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 1, true);
@@ -113,8 +134,8 @@ int main(int argc, char **argv)
 
     moveit::planning_interface::MoveGroup::Plan plan;
     group.setStartStateToCurrentState();
-    group.setPoseReferenceFrame("base_link");
-    group.setEndEffectorLink("end_effector");
+    //group.setPoseReferenceFrame("base_link");
+    //group.setEndEffectorLink("end_effector");
 
     double orientToll = group.getGoalOrientationTolerance();
     double positionToll = group.getGoalPositionTolerance () ;
@@ -136,15 +157,22 @@ int main(int argc, char **argv)
     std::vector<double> jointDbg = group.getCurrentJointValues();
 
     for (int i=0; i< jointDbg.size(); i++)
-        std::cout<<"joint "<<i<<"= "<<jointDbg[i]<<std::endl;//*/
+        std::cout<<"joint i"<<i<<"= "<<jointDbg[i]<<std::endl;//*/
 
 
-    joints["j1"] = 0.00134856;
-    joints["j2"] = -0.188797;
-    joints["j3"] = 2.09629;
-    joints["j4"] = 0.00934622;
-    joints["j5"] = -0.311011;
-    joints["j6"] = 1.56739;
+//    joints["j1"] = 0.00134856;
+//    joints["j2"] = -0.188797;
+//    joints["j3"] = 2.09629;
+//    joints["j4"] = 0.00934622;
+//    joints["j5"] = -0.311011;
+//    joints["j6"] = 1.56739;
+
+    joints["joint_1"] = 0.000119189;
+    joints["joint_2"] = -0.0129632;
+    joints["joint_3"] = 0.274897;
+    joints["joint_4"] = 0.00352502;
+    joints["joint_5"] = -0.262732;
+    joints["joint_6"] = 1.56739;
 
 //    joint 0= 0.00134856
 //    joint 1= -0.188797
@@ -159,7 +187,7 @@ int main(int argc, char **argv)
     group.move();//*/
 
 
-    sleep(10);
+    sleep(5);
 
     //  new cartesian position from keyboard
     ros::Subscriber subscriber = node_handle.subscribe("position", 1000, positionCallback);
@@ -180,7 +208,7 @@ int main(int argc, char **argv)
             //		moveCartesian (&group, robotIncrement[0], robotIncrement[1], robotIncrement[2],
             //				robotIncrement[3], robotIncrement[4], robotIncrement[5]);
             moveCartesian (&group, robotIncrement[0], robotIncrement[1], robotIncrement[2],
-                           0.0,0.0,0.0);
+                    0.0,0.0,0.0);
         }
 
     }//
