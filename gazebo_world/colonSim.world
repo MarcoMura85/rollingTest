@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<sdf version="1.4">
+  <world name="default">
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <model name="my_mesh">
+      <pose>0 0 1.2 0 0 0</pose>
+      <static>true</static>
+      <link name="body">
+        <visual name="visual">
+          <geometry>
+            <mesh><uri>file://parte1-scaled.dae</uri></mesh>
+          </geometry>
+        </visual>
+  	<collision name='part1_collision'>
+           <geometry>
+            <mesh>
+              <uri>file://parte1-scaled.dae</uri>
+            </mesh>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+  </world>
+</sdf>
