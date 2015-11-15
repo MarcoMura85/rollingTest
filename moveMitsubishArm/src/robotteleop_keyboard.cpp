@@ -108,7 +108,7 @@ int main(int argc, char** argv)
     signal(SIGINT,quit);
 
     boost::thread my_thread(boost::bind(&RobotTeleop::keyLoop, &keyboard_teleop));
-    ros::Timer timer = n.createTimer(ros::Duration(1.0), boost::bind(&RobotTeleop::watchdog, &keyboard_teleop));
+    ros::Timer timer = n.createTimer(ros::Duration(0.01), boost::bind(&RobotTeleop::watchdog, &keyboard_teleop));
     ros::spin();
     my_thread.interrupt() ;
     my_thread.join() ;
@@ -119,8 +119,8 @@ int main(int argc, char** argv)
 void RobotTeleop::watchdog()
 {
     boost::mutex::scoped_lock lock(publish_mutex_);
-    if ((ros::Time::now() > last_publish_ + ros::Duration(1.0)) &&
-            (ros::Time::now() > first_publish_ + ros::Duration(1.0)))
+    if ((ros::Time::now() > last_publish_ + ros::Duration(0.01)) &&
+            (ros::Time::now() > first_publish_ + ros::Duration(0.01)))
         publishInc(0, 0, 0, 0, 0, 0);
 }
 
@@ -161,7 +161,7 @@ void RobotTeleop::keyLoop()
         {
 	
         case KEYCODE_L:
-            ROS_DEBUG("LEFT");
+            ROS_INFO("LEFT");
             incX = 0.0;
             incY = 0.01;
             incZ = 0.0;
@@ -172,7 +172,7 @@ void RobotTeleop::keyLoop()
 
             break;
         case KEYCODE_R:
-            ROS_DEBUG("RIGHT");
+            ROS_INFO("RIGHT");
             incX = 0.0;
             incY = -0.01;
             incZ = 0.0;
@@ -252,7 +252,7 @@ void RobotTeleop::keyLoop()
             break;
         }
         boost::mutex::scoped_lock lock(publish_mutex_);
-        if (ros::Time::now() > last_publish_ + ros::Duration(1.0)) {
+        if (ros::Time::now() > last_publish_ + ros::Duration(0.01)) {
             first_publish_ = ros::Time::now();
         }
         last_publish_ = ros::Time::now();
