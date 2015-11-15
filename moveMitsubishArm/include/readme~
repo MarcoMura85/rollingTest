@@ -1,3 +1,0 @@
-rosrun moveMitsubishArm moveTest /joint_states:=/mitsubishi_arm/joint_states
-
-

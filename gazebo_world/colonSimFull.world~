@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<sdf version="1.4">
+  <world name="default">
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <model name="part1">
+      <pose>1.46 -4 1.2 0 0 0</pose>
+      <static>true</static>
+      <link name="body1">
+        <visual name="visual1">
+          <geometry>
+            <mesh><uri>file://parte1-scaled.dae</uri></mesh>
+          </geometry>
+        </visual>
+  	<collision name='part1_collision'>
+           <geometry>
+            <mesh>
+              <uri>file://parte1-scaled.dae</uri>
+            </mesh>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="part2">
+      <pose>3 4.2 1.2 0 0 0</pose>
+      <static>true</static>
+      <link name="body2">
+        <visual name="visual2">
+          <geometry>
+            <mesh><uri>file://parte2-scaled.dae</uri></mesh>
+          </geometry>
+        </visual>
+  	<collision name='part2_collision'>
+           <geometry>
+            <mesh>
+              <uri>file://parte2-scaled.dae</uri>
+            </mesh>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+   <model name="part3">
+      <pose>-2.9 2 1.2 0 0 0</pose>
+      <static>true</static>
+      <link name="body3">
+        <visual name="visual3">
+          <geometry>
+            <mesh><uri>file://parte3-scaled.dae</uri></mesh>
+          </geometry>
+        </visual>
+  	<collision name='part3_collision'>
+           <geometry>
+            <mesh>
+              <uri>file://parte3-scaled.dae</uri>
+            </mesh>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+  </world>
+</sdf>
